@@ -142,7 +142,7 @@ class Task extends Model
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOldest($query)
+    public function scopeOldestTask($query)
     {
         return $query->orderBy('created_at', 'asc');
     }
@@ -153,7 +153,7 @@ class Task extends Model
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeNewest($query)
+    public function scopeNewestTask($query)
     {
         return $query->orderBy('created_at', 'desc');
     }

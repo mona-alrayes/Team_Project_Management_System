@@ -29,14 +29,15 @@ class TaskService
     public function getAllTasks(Request $request): array
     {
         try {
-            // Create a query builder instance for the Task model
-            $tasks = Task::with(['user' => function ($query) {
-                $query->select('id', 'assigned_to');
-            }])
+
+            $tasks = Task::with(['user', 'project'])
                 ->when($request->priority, fn($q) => $q->priority($request->priority))
                 ->when($request->status, fn($q) => $q->status($request->status))
                 ->when($request->sort_order, fn($q) => $q->sortByDueDate($request->sort_order))
+                ->when($request->oldest_task, fn($q) => $q->oldestTask())
+                ->when($request->newest_task, fn($q) => $q->newestTask())
                 ->paginate(5);
+
                 
             // Throw a ModelNotFoundException if no tasks were found
             if ($tasks->isEmpty()) {

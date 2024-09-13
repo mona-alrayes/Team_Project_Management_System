@@ -15,15 +15,16 @@ class TaskResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+
+            'id' => $this->id,
             'title' => $this->title,
-            'assigned_to' => $this->user ? $this->user->name : null, // Check if user is not null
             'description' => $this->description,
+            'priority' => $this->priority,
             'status' => $this->status,
             'due_date' => $this->due_date,
-            'priority' =>$this->priority,
-            'project' => $this->project_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'status_changed_at' => $this->status_changed_at,
+            'project_name' => $this->project->name ?? null, 
+            'assigned_to' => $this->user->name ?? null,
         ];
     }
 }
