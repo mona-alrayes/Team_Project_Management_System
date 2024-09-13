@@ -63,6 +63,7 @@ class AuthService
             $user->name = $data['name'];
             $user->email = $data['email'];
             $user->password = $data['password'];
+            $user->system_role = 'user';
             $user->save();
 
             // Generate a JWT token for the user

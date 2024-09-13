@@ -14,7 +14,16 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-   
+    /**
+     * The attributes that aren mass assignable.
+     *
+     * @var array
+     */
+
+    protected $fillable = [
+        'name',
+        'email'
+    ];
     /**
      * The attributes that aren't mass assignable.
      *
@@ -22,7 +31,8 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $guarded = [
         'id',
-        'password'
+        'password',
+        'system_role',
     ];
 
     /**

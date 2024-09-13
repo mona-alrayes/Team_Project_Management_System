@@ -5,10 +5,17 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-class RegisterRequest extends FormRequest
-{
-    /**
+
+class StoreUSerRequest extends FormRequest
+{/**
      * Determine if the user is authorized to make this request.
+     *
+     * This method determines if the user making the request is authorized
+     * to perform this action. By default, it returns true, allowing all
+     * requests to pass authorization. Override this method to implement
+     * custom authorization logic.
+     *
+     * @return bool True if authorized, otherwise false.
      */
     public function authorize(): bool
     {
@@ -18,16 +25,22 @@ class RegisterRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * This method returns an array of validation rules that apply to the
+     * request. Each key in the array represents an input field, and each
+     * value is an array of validation rules.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string> Array of validation rules.
      */
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'system_role' => ['nullable', 'in:admin,user'],
         ];
     }
+
     /**
      * Get the custom error messages for validation rules.
      *
@@ -47,6 +60,8 @@ class RegisterRequest extends FormRequest
             'email' => 'حقل :attribute يجب ان يكون بصيغة صحيحة مثل test@example.com',
             'email.unique' => 'هذا :attribute موجود بالفعل في بياناتنا',
             'min' => 'حقل :attribute يجب ان يكون 8 محارف على الاقل',
+            'password.confirmed' => 'حقل تأكيد :attribute غير مطابق لحقل :attribute',
+            'role.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: admin, user',
         ];
     }
 
@@ -82,6 +97,8 @@ class RegisterRequest extends FormRequest
             'name' => ucwords(strtolower($this->input('name'))),
         ]);
     }
+
+
     /**
      * Handle a failed validation attempt.
      *
@@ -95,8 +112,8 @@ class RegisterRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'status'  => 'خطأ',
-            'message' => 'فشلت المصادقة',
+            'status'  => 'error',
+            'message' => 'Validation failed.',
             'errors'  => $validator->errors(),
         ], 422));
     }
