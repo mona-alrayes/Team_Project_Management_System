@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,84 +13,65 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-    /**
-     * The attributes that aren mass assignable.
-     *
-     * @var array
-     */
-
     protected $fillable = [
         'name',
-        'email'
+        'email',
     ];
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * @var array
-     */
+
     protected $guarded = [
         'id',
         'password',
         'system_role',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
 
-    /**
-     * Get the identifier that will be stored in the subject claim of the JWT.
-     *
-     * @return mixed
-     */
-    public function getJWTIdentifier()
-    {
-        return $this->getKey(); // returns user_id
-    }
-
-    /**
-     * Return a key-value array containing any custom claims to be added to the JWT.
-     *
-     * @return array
-     */
-    public function getJWTCustomClaims()
-    {
-        return [];
-    }
-
-    /**
-     * Automatically hash the password when setting it.
-     *
-     * @param string $password
-     * The password to be hashed before saving.
-     */
+    // Automatically hash the password when setting it
     public function setPasswordAttribute($password)
     {
         $this->attributes['password'] = Hash::make($password);
     }
 
-    /**
-     * Define a one-to-many relationship with the Task model.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
+    // Define a one-to-many relationship with Task
     public function tasks()
     {
         return $this->hasMany(Task::class);
     }
+
+    // Define many-to-many relationship with Project
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class)->withPivot('role', 'contribution_hours', 'last_activity');
+    }
+
+    // Define the most recent task
+    public function lastTask()
+    {
+        return $this->hasOne(Task::class)->latestOfMany();
+    }
+
+    // Define the oldest task
+    public function oldestTask()
+    {
+        return $this->hasOne(Task::class)->oldestOfMany();
+    }
+
+    // JWT Methods
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 }
+

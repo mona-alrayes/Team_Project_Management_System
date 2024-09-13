@@ -31,7 +31,7 @@ class Task extends Model
         'status',
         'due_date',
         'project_id',
-        'status_changed_at'
+        'status_changed_at',
     ];
 
     /**
@@ -41,28 +41,11 @@ class Task extends Model
      */
     protected $casts = [
         'due_date' => 'datetime',
-        'status_changed_at' => 'datetime'
+        'status_changed_at' => 'datetime',
     ];
 
     /**
-     * Mutator for setting the 'due_date' attribute.
-     *
-     * This mutator ensures that the input date is parsed and saved
-     * in the 'Y-m-d H:i:s' format (e.g., "2024-09-20 14:30:00") in the database.
-     *
-     * @param string $dueDate The input due date in any Carbon-parsable format.
-     * @return void
-     */
-    public function setDueDateAttribute($dueDate)
-    {
-        $this->attributes['due_date'] = Carbon::parse($dueDate)->format('Y-m-d H:i:s');
-    }
-
-    /**
      * Accessor for retrieving the 'due_date' attribute.
-     *
-     * This accessor formats the due date into a more human-readable form like
-     * "Saturday, September 2024 at 02:30 PM" when accessed.
      *
      * @param string $value The stored due date value from the database.
      * @return string The formatted date.
@@ -73,7 +56,52 @@ class Task extends Model
     }
 
     /**
-     * Scope for filtering tasks by priority.
+     * Mutator for setting the 'due_date' attribute.
+     *
+     * @param string $dueDate The input due date in any Carbon-parsable format.
+     * @return void
+     */
+    public function setDueDateAttribute($dueDate)
+    {
+        $this->attributes['due_date'] = Carbon::parse($dueDate)->format('Y-m-d H:i:s');
+    }
+
+    // Relationships
+
+    /**
+     * Relationship with the User model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'assigned_to', 'id');
+    }
+
+    /**
+     * Relationship with the Project model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * Relationship with the Note model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
+
+    // Scopes
+
+    /**
+     * Scope to filter tasks by priority.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param string $priority The priority to filter by (e.g., "high", "medium").
@@ -85,7 +113,7 @@ class Task extends Model
     }
 
     /**
-     * Scope for filtering tasks by status.
+     * Scope to filter tasks by status.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param string $status The status to filter by (e.g., "To Do", "In Progress").
@@ -97,7 +125,7 @@ class Task extends Model
     }
 
     /**
-     * Scope for sorting tasks by due date.
+     * Scope to sort tasks by due date.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param string $sortOrder The sorting order (e.g., "asc" or "desc").
@@ -109,15 +137,25 @@ class Task extends Model
     }
 
     /**
-     * Relationship with the User model.
+     * Scope to order tasks by creation date in ascending order.
      *
-     * Defines the relationship between the task and the user it is assigned to.
-     * Each task belongs to a single user.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function user()
+    public function scopeOldest($query)
     {
-        return $this->belongsTo(User::class, 'assigned_to', 'user_id');
+        return $query->orderBy('created_at', 'asc');
+    }
+
+    /**
+     * Scope to order tasks by creation date in descending order.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeNewest($query)
+    {
+        return $query->orderBy('created_at', 'desc');
     }
 }
+
