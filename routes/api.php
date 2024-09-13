@@ -25,8 +25,9 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 // Admin-only routes
-Route::group(['middleware' => ['auth:api', 'SystemRole:admin']], function () {
+Route::group(['middleware' => ['auth:api','SystemRole:admin']], function () {
     Route::apiResource('users', UserController::class)->only(['store','update','delete']);
+    Route::put('users/{id}/restore', [UserController::class, 'restoreUser']);
 });
 
 Route::apiResource('users', UserController::class)->except(['store','update','delete']);

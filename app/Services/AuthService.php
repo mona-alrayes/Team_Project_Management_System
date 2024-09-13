@@ -19,7 +19,10 @@ class AuthService
     {
         try {
             // Attempt to authenticate with credentials
-            $credentials = $data['email'] + $data['password'];
+            $credentials = [
+                'email' => $data['email'],
+                'password' => $data['password'],
+            ];
             $token = Auth::attempt($credentials);
 
             if (!$token) {
@@ -43,6 +46,7 @@ class AuthService
             ];
         }
     }
+
 
     /**
      * Register a new user.
@@ -81,5 +85,4 @@ class AuthService
             ];
         }
     }
-
 }

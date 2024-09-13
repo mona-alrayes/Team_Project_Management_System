@@ -20,7 +20,7 @@ class SystemRole
         // Check if the user is authenticated
         if (Auth::check()) {
             // Get the user's role
-            $userRole = Auth::user()->role;
+            $userRole = Auth::user()->system_role;
 
             // Check if the user's role is in the allowed roles
             if (in_array($userRole, $roles)) {

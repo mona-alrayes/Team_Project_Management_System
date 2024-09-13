@@ -61,7 +61,7 @@ class StoreUSerRequest extends FormRequest
             'email.unique' => 'هذا :attribute موجود بالفعل في بياناتنا',
             'min' => 'حقل :attribute يجب ان يكون 8 محارف على الاقل',
             'password.confirmed' => 'حقل تأكيد :attribute غير مطابق لحقل :attribute',
-            'role.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: admin, user',
+            'system_role.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: admin, user',
         ];
     }
 
@@ -80,6 +80,7 @@ class StoreUSerRequest extends FormRequest
             'name' => 'الأسم',
             'email' => 'البريد الالكتروني',
             'password' => 'كلمة المرور',
+            'system_role' => 'صلاحية النظام'
         ];
     }
 

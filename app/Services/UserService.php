@@ -48,11 +48,15 @@ class UserService
     public function registerUser(array $data): array
     {
         try {
-            
-            $user= User::create($data);
+            $user = new User();
+            $user->name = $data['name'];
+            $user->email = $data['email'];
+            $user->password = $data['password'];
+            $user->system_role = $data['system_role'];
+            $user->save();
+
             // Generate a JWT token for the user
             $token = auth()->login($user);
-
             return [
                 'user' => $user,
                 'token' => $token,
@@ -94,9 +98,9 @@ class UserService
                 throw new Exception('User not found!');
             }
 
-            // if (isset($data['role'])) {
-            //     $user->system_role = $data['role'];
-            // }
+            if (isset($data['system_role'])) {
+                $user->system_role = $data['system_role'];
+            }
             $user->update(array_filter($data));
             $token = auth()->login($user);
 
@@ -134,7 +138,7 @@ class UserService
             return $user;
         } catch (Exception $e) {
             // Handle any other exceptions
-            throw new Exception('An error occurred while retrieving the user: ' . $e->getMessage() );
+            throw new Exception('An error occurred while retrieving the user: ' . $e->getMessage());
         }
     }
 
@@ -165,6 +169,32 @@ class UserService
             return [
                 'status' => 'success',
                 'message' => 'User deleted successfully.',
+            ];
+        } catch (Exception $e) {
+            // Handle any other exceptions
+            return [
+                'status' => 'error',
+                'message' => 'An error occurred during deletion.',
+                'errors' => $e->getMessage(),
+            ];
+        }
+    }
+
+    public function restoreUser($id): array
+    {
+        try {
+            $user = User::withTrashed()->find($id);
+
+            if (!$user) {
+                throw new Exception('User not found!');
+            }
+            if($user && $user->trashed()){
+                $user->restore();
+            }
+            return [
+                'status' => 'success',
+                'message' => 'User restored successfully',
+                'user' => $user,
             ];
         } catch (Exception $e) {
             // Handle any other exceptions
