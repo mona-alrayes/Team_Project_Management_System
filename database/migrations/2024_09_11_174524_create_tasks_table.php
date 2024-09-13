@@ -19,6 +19,8 @@ return new class extends Migration
             $table->dateTime('due_date'); 
             $table->unsignedBigInteger('project_id');
             $table->unsignedBigInteger('assigned_to')->nullable();
+            $table->unsignedBigInteger('note_id')->nullable();
+            $table->foreign('note_id')->references('id')->on('notes')->onDelete('set null');;
             $table->foreign('assigned_to')->references('id')->on('users')->onDelete('set null');
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
             $table->enum('priority',['high,low,medium']);

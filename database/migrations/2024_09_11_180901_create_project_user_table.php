@@ -16,14 +16,13 @@ return new class extends Migration
             $table->timestamps();
             $table->unsignedBigInteger('project_id');
             $table->unsignedBigInteger('user_id');
-            $table->foreign('project_id')->references('id')->on('projects');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users'); // thinks if I should add on delete cascade here !!!
             $table->softDeletes(); 
             $table->index(['project_id', 'user_id']); 
             $table->enum('role', ['manager','developer','tester']);
             $table->date('last_activity');
             $table->integer('contrubution_hours');
-            
         });
     }
 
