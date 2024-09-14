@@ -7,6 +7,7 @@ use App\Services\ProjectService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProjectResource;
 use App\Http\Requests\StoreProjectRequest;
+use App\Http\Requests\UpdateProjectRequest;
 
 class ProjectController extends Controller
 {
@@ -70,10 +71,21 @@ class ProjectController extends Controller
         ], 200); // OK
     }
 
+    public function showMyProjectTasks ( string $id , Request $request)
+    {
+        $project = $this->ProjectService->MyProjects($id , $request);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Project with tasks retrieved successfully',
+            'project' => ProjectResource::make($project),
+        ], 200); // OK
+    }
+
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProjectRequest $request, string $id)
     {
         $project = $this->ProjectService->updateProject($request->validated(), $id);
 

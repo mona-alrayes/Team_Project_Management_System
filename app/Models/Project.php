@@ -21,6 +21,10 @@ class Project extends Model
         return $this->hasMany(Task::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class , 'assigned_to');
+    }
     // Define many-to-many relationship with User 
     public function users()
     {

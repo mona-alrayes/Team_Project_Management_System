@@ -11,18 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+       
         Schema::create('project_user', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
-            $table->unsignedBigInteger('project_id');
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users'); // thinks if I should add on delete cascade here !!!
-            $table->softDeletes(); 
-            $table->index(['project_id', 'user_id']); 
+            $table->foreignId('project_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->index(columns: ['project_id', 'user_id']); 
             $table->enum('role', ['manager','developer','tester']);
-            $table->date('last_activity');
-            $table->integer('contrubution_hours');
+            $table->softDeletes(); 
+            $table->integer('contribution_hours')->nullable();
+            $table->timestamp('last_activity')->nullable();
+            $table->timestamps();
         });
     }
 

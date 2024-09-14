@@ -28,6 +28,7 @@ class ProjectService
      */
     public function getAllProjects(Request $request): array
     {
+        #TODO : 1- be to bring tasks of projects and filter them according to "status" or "priority" 
         try {
             $projects = Project::with(['user', 'tasks'])
                 ->paginate(5);
@@ -99,7 +100,22 @@ class ProjectService
             throw new Exception('Failed to retrieve project: ' . $e->getMessage());
         }
     }
+    public function MyProjects(string $id , $request): Project
+    {
+        #TODO: 1- be able to bring user project with all tasks belongs to the user "hasManyThrough" relationship .
+        #TODO: 2- be able to filter his project tasks according to "status" or "priority" using "whereRelation" .
+        #TODO: 3- to bring the oldest and newest task of the project .
+        #TODO : 4- to be able to bring the high priority task of the project according to title input condition 
 
+        try {
+            $project = Project::findOrFail($id);
+            return $project;
+        } catch (ModelNotFoundException $e) {
+            throw new Exception('Project not found: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to retrieve project: ' . $e->getMessage());
+        }
+    }
     /**
      * Update an existing project.
      * 

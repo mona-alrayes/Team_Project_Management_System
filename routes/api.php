@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\V1\ProjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,8 +30,13 @@ Route::controller(AuthController::class)->group(function () {
 Route::group(['middleware' => ['auth:api','SystemRole:admin']], function () {
     Route::apiResource('users', UserController::class)->only(['store','update','delete']);
     Route::put('users/{id}/restore', [UserController::class, 'restoreUser']);
-    Route::apiResource('tasks', TaskController::class)->except(['updateByAssignedUser']);
+    Route::apiResource('tasks', TaskController::class)->except(['updateByAssignedUser','restoreTask']);
     Route::put('tasks/{id}/restore', [TaskController::class, 'restoreTask']);
+    Route::apiResource('projects', ProjectController::class)->except(['showMyProjectTasks','restoreTask']);
+    Route::put('projects/{id}/restore', [ProjectController::class, 'restoreProject']);
+    Route::get('projects/{id}/myTasks', [ProjectController::class, 'showMyProjectTasks']);
+
+
 });
 // User-only routes for task status change
 Route::group(['middleware' => 'auth:api'], function () {
