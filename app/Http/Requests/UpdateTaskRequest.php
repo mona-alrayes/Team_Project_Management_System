@@ -85,12 +85,11 @@ class UpdateTaskRequest extends FormRequest
                 ], 422));
             }
         }
-
         // Merge the transformed inputs
         $this->merge([
             'title' => ucwords(strtolower($this->input('title'))),
             'description' => ucwords(strtolower($this->input('description'))),
-            'assigned_to' => $user ? $user->user_id : null,
+            'assigned_to' => $user ? $user->id : null,
         ]);
     }
 

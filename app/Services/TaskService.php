@@ -30,15 +30,41 @@ class TaskService
     {
         try {
 
-            $tasks = Task::with(['user', 'project'])
-                ->when($request->priority, fn($q) => $q->priority($request->priority))
-                ->when($request->status, fn($q) => $q->status($request->status))
-                ->when($request->sort_order, fn($q) => $q->sortByDueDate($request->sort_order))
-                ->when($request->oldest_task, fn($q) => $q->oldestTask())
-                ->when($request->newest_task, fn($q) => $q->newestTask())
-                ->paginate(5);
+         // Check if oldest_task or newest_task is set
+         if ($request->has('oldest_task')) {
+            $oldestTask = Task::oldestTask();
+            if (!$oldestTask) {
+                throw new ModelNotFoundException('No tasks found.');
+            }
+            return [
+                'data' => [$oldestTask],
+                'current_page' => 1,
+                'last_page' => 1,
+                'per_page' => 1,
+                'total' => 1,
+            ];
+        }
 
-                
+        if ($request->has('newest_task')) {
+            $newestTask = Task::newestTask();
+            if (!$newestTask) {
+                throw new ModelNotFoundException('No tasks found.');
+            }
+            return [
+                'data' => [$newestTask],
+                'current_page' => 1,
+                'last_page' => 1,
+                'per_page' => 1,
+                'total' => 1,
+            ];
+        }
+        // If no specific oldest/newest task is requested, proceed with regular query and pagination
+        $tasks = Task::with(['user', 'project'])
+            ->when($request->priority, fn($q) => $q->priority($request->priority))
+            ->when($request->status, fn($q) => $q->status($request->status))
+            ->when($request->sort_order, fn($q) => $q->sortByDueDate($request->sort_order))
+            ->paginate(5);
+        
             // Throw a ModelNotFoundException if no tasks were found
             if ($tasks->isEmpty()) {
                 throw new ModelNotFoundException('No tasks found.');

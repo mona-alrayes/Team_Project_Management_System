@@ -137,25 +137,30 @@ class Task extends Model
     }
 
     /**
-     * Scope to order tasks by creation date in ascending order.
+     * Get the oldest task by creation date.
+     *
+     * This scope retrieves the first task ordered by the `created_at` column
+     * in ascending order, along with its related `user` and `project`.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return \App\Models\Task|null
      */
     public function scopeOldestTask($query)
     {
-        return $query->orderBy('created_at', 'asc');
+        return $query->with(['user', 'project'])->orderBy('updated_at', 'asc')->first();
     }
 
     /**
-     * Scope to order tasks by creation date in descending order.
+     * Get the newest task by creation date.
+     *
+     * This scope retrieves the first task ordered by the `created_at` column
+     * in descending order, along with its related `user` and `project`.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return \App\Models\Task|null
      */
     public function scopeNewestTask($query)
     {
-        return $query->orderBy('created_at', 'desc');
+        return $query->with(['user', 'project'])->orderBy('updated_at', 'desc')->first();
     }
 }
-

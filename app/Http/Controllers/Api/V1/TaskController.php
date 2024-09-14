@@ -76,9 +76,9 @@ class TaskController extends Controller
      * @param string $id The ID of the task to retrieve.
      * @return \Illuminate\Http\JsonResponse JSON response containing the task data.
      */
-    public function show(string $id)
+    public function show(string $id )
     {
-        $fetchedData = $this->TaskService->showTask($id);
+        $fetchedData = $this->TaskService->showTask($id );
 
         return response()->json([
             'status' => 'success',

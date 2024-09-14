@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedBigInteger('assigned_to')->nullable();
             $table->foreign('assigned_to')->references('id')->on('users')->onDelete('set null');
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
-            $table->enum('priority',['high,low,medium']);
+            $table->enum('priority', ['high', 'low', 'medium']);
             $table->softDeletes(); 
             $table->timestamp('status_changed_at')->nullable(); // would use it to track the status changes dates
             $table->timestamps();

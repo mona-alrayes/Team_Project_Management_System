@@ -27,10 +27,11 @@ class StoreTaskRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'min:3', 'max:255'],
             'description' => ['required', 'string', 'min:10', 'max:2000'],
-            'priority' => ['required', 'string', 'in:highest,high,medium,low,lowest'],
-            'assigned_to' => ['nullable', 'integer', 'exists:users,user_id'],
+            'priority' => ['required', 'string', 'in:high,medium,low'],
+            'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
             'status' => ['nullable', 'string', 'in:pending,in_progress,completed'],
             'due_date' => ['required', 'date_format:d-m-Y H:i', 'after_or_equal:now'],
+            'project_id' => ['required','exists:projects,id'],
         ];
     }
 
@@ -48,8 +49,8 @@ class StoreTaskRequest extends FormRequest
             'description.max' => 'لا يجب أن يتجاوز :attribute 2000 محرفًا',
             'min' => 'حقل :attribute يجب أن يكون 3 محارف على الأقل',
             'description.min' => 'عدد محارف :attribute لا يقل عن 10 محارف',
-            'priority.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: highest, high, medium, low, lowest',
-            'status.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: To Do, In progress, Done',
+            'priority.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: high, medium, low',
+            'status.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: pending, in-progress, completed',
             'date_format' => 'حقل :attribute يجب أن يكون بصيغة تاريخ صحيحة مثل :format',
             'after_or_equal' => 'لا يمكن أن يكون :attribute تاريخًا في الماضي',
             'exists' => 'القيمة المحددة في حقل :attribute غير موجودة'
