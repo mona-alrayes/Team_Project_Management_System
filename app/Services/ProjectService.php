@@ -100,6 +100,7 @@ class ProjectService
             throw new Exception('Failed to retrieve project: ' . $e->getMessage());
         }
     }
+
     public function MyProjects(string $id , $request): Project
     {
         #TODO: 1- be able to bring user project with all tasks belongs to the user "hasManyThrough" relationship .
@@ -109,6 +110,7 @@ class ProjectService
 
         try {
             $project = Project::findOrFail($id);
+            $project->userTasks();
             return $project;
         } catch (ModelNotFoundException $e) {
             throw new Exception('Project not found: ' . $e->getMessage());

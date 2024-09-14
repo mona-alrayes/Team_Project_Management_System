@@ -232,7 +232,7 @@ class TaskService
             return [
                 'status' => 'success',
                 'message' => 'Task restored successfully',
-                'user' => $task,
+                'task' => $task,
             ];
         } catch (Exception $e) {
             // Handle any other exceptions

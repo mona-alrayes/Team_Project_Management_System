@@ -23,7 +23,7 @@ class Project extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class , 'assigned_to');
+        return $this->belongsTo(User::class, 'assigned_to');
     }
     // Define many-to-many relationship with User 
     public function users()
@@ -45,7 +45,9 @@ class Project extends Model
 
     public function userTasks()
     {
-        return $this->hasManyThrough(Task::class, User::class);
+        // Assumes User is related to Project via a pivot table and Task is related to Project
+        return $this->hasManyThrough(Task::class, Project::class, 'user_id', 'project_id', 'id', 'id')
+            ->where('tasks.assigned_to', $this->id); // Optional: Filter tasks assigned to the user
     }
 
     // Scope to filter tasks by status

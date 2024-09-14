@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\V1\ProjectController;
+use App\Http\Controllers\Api\V1\ProjectUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,3 +42,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::put('/tasks/{id}/changeStatus', [TaskController::class, 'updateByAssignedUser']);
 });
 Route::apiResource('users', UserController::class)->except(['store','update','delete']);
+
+Route::post('projects/{projectId}/users', [ProjectUserController::class, 'addUserToProject']);
+Route::delete('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'removeUserFromProject']);
+Route::put('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'updateUserInProject']);  //change user role in the project
+Route::get('projects/{projectId}/users', [ProjectUserController::class, 'showUsersInProject']);
