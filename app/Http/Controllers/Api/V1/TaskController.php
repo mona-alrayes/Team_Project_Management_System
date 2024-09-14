@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Services\TaskService;
 use App\Http\Resources\TaskResource;
 use App\Http\Requests\StoreTaskRequest;
@@ -138,5 +139,16 @@ class TaskController extends Controller
             'status' => 'success',
             'message' => $message,
         ], 200); // OK
+    }
+
+    public function restoreTask($id): \Illuminate\Http\JsonResponse
+    {
+        $message= $this->TaskService->restoreTask($id);
+        return response()->json([
+            'status' => $message['status'],
+            'message' => $message['message'],
+            'task' => new TaskResource($message['task']),
+        ], 200); // OK
+       
     }
 }

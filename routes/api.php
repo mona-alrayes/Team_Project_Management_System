@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\Auth\AuthController;
 
@@ -28,6 +29,11 @@ Route::controller(AuthController::class)->group(function () {
 Route::group(['middleware' => ['auth:api','SystemRole:admin']], function () {
     Route::apiResource('users', UserController::class)->only(['store','update','delete']);
     Route::put('users/{id}/restore', [UserController::class, 'restoreUser']);
+    Route::apiResource('tasks', TaskController::class)->except(['updateByAssignedUser']);
+    Route::put('tasks/{id}/restore', [TaskController::class, 'restoreTask']);
 });
-
+// User-only routes for task status change
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::put('/tasks/{id}/changeStatus', [TaskController::class, 'updateByAssignedUser']);
+});
 Route::apiResource('users', UserController::class)->except(['store','update','delete']);

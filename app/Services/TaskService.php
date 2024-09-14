@@ -154,7 +154,7 @@ class TaskService
     {
         try {
             $task = Task::findOrFail($id);
-
+            $task->status_changed_at= now();
             $task->update(array_filter($data));
 
             return $task;
@@ -189,6 +189,32 @@ class TaskService
             throw new Exception('Task not found: ' . $e->getMessage());
         } catch (Exception $e) {
             throw new Exception('Failed to delete task: ' . $e->getMessage());
+        }
+    }
+
+    public function restoreTask($id): array
+    {
+        try {
+            $task = Task::withTrashed()->find($id);
+
+            if (!$task) {
+                throw new Exception('Task not found!');
+            }
+            if($task && $task->trashed()){
+                $task->restore();
+            }
+            return [
+                'status' => 'success',
+                'message' => 'Task restored successfully',
+                'user' => $task,
+            ];
+        } catch (Exception $e) {
+            // Handle any other exceptions
+            return [
+                'status' => 'error',
+                'message' => 'An error occurred during deletion.',
+                'errors' => $e->getMessage(),
+            ];
         }
     }
 }

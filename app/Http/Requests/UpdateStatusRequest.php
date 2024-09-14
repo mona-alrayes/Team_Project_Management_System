@@ -29,7 +29,38 @@ class UpdateStatusRequest extends FormRequest
         }
 
         // Check if the task exists and the authenticated user is the one assigned to the task
-        return $task && $task->assigned_to === auth()->user()->user_id; 
+        return $task && $task->assigned_to === auth()->user()->id; 
+
+        #FIXME : change the authorize so it can check for auth and role of user in project pivot table
+        #TODO : rememeber to finish this part 
+        //  // Get the task ID from the route
+        //  $taskId = $this->route('id');
+        //  // Retrieve the task from the database
+        //  $task = Task::find($taskId);
+ 
+        //  // If the task does not exist, return false or throw an error
+        //  if (!$task) {
+        //      throw new HttpResponseException(response()->json([
+        //          'status' => 'خطأ',
+        //          'message' => 'المهمة غير موجودة',
+        //      ], 404));
+        //  }
+ 
+        //  // Get the authenticated user
+        //  $user = auth()->user();
+ 
+        //  // Check if the user is assigned to the task
+        //  if ($task->assigned_to !== $user->user_id) {
+        //      return false;
+        //  }
+ 
+        //  // Get the project associated with the task
+        //  $project = $task->project;
+ 
+        //  // Check if the user is part of the project and has the 'developer' role
+        //  $role = $project->users()->wherePivot('user_id', $user->id)->wherePivot('role', 'developer')->exists();
+ 
+        //  return $role;
     }
     /**
      * Get the validation rules that apply to the request.
