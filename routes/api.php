@@ -35,8 +35,6 @@ Route::group(['middleware' => ['auth:api','SystemRole:admin']], function () {
     Route::apiResource('projects', ProjectController::class)->except(['showMyProjectTasks','restoreTask']);
     Route::put('projects/{id}/restore', [ProjectController::class, 'restoreProject']);
     Route::get('projects/{id}/myTasks', [ProjectController::class, 'showMyProjectTasks']);
-
-
 });
 // User-only routes for task status change
 Route::group(['middleware' => 'auth:api'], function () {
