@@ -14,7 +14,21 @@ class UpdateNoteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+          // Get the task and the associated project
+          $task = Task::find($this->input('task_id'));
+
+          if (!$task) {
+              return false; // If the task doesn't exist, deny the request
+          }
+  
+          // Get the user's role in the project through the pivot table
+          $userProjectRole = $task->project->users()
+              ->where('user_id', Auth::id())
+              ->first()
+              ->pivot->role ?? null;
+  
+          // Only allow users with the role 'tester' to store notes
+          return $userProjectRole === 'tester';
     }
 
   /**

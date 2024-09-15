@@ -15,8 +15,21 @@ class StoreNoteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        #TODO go back here to see if we need to make only tester user to be able to store note
-        return true;
+        // Get the task and the associated project
+        $task = Task::find($this->input('task_id'));
+
+        if (!$task) {
+            return false; // If the task doesn't exist, deny the request
+        }
+
+        // Get the user's role in the project through the pivot table
+        $userProjectRole = $task->project->users()
+            ->where('user_id', Auth::id())
+            ->first()
+            ->pivot->role ?? null;
+
+        // Only allow users with the role 'tester' to store notes
+        return $userProjectRole === 'tester';
     }
 
     /**
@@ -61,14 +74,14 @@ class StoreNoteRequest extends FormRequest
         ];
     }
 
-    
+
     protected function prepareForValidation()
     {
         $task = Task::where('title', $this->input('task_id'))->first();
 
         $this->merge([
             'note' => ucwords(strtolower($this->input('note'))),
-            'user_id' => Auth::user() ,
+            'user_id' => Auth::user(),
             'task_id' => $task->id,
         ]);
     }
@@ -87,5 +100,4 @@ class StoreNoteRequest extends FormRequest
             'errors'  => $validator->errors(),
         ], 422));
     }
-
 }
