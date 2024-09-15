@@ -11,7 +11,8 @@ class Note extends Model
 
     protected $fillable = [
         'note',
-        'task_id',  // Foreign key for the task this note belongs to
+        'task_id',
+        'user_id',  // Foreign key for the task this note belongs to
     ];
 
     /**

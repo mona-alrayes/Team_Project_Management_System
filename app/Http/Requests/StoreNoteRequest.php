@@ -15,20 +15,22 @@ class StoreNoteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Get the task and the associated project
-        $task = Task::find($this->input('task_id'));
-
-        if (!$task) {
-            return false; // If the task doesn't exist, deny the request
+        // Load the task and the related project with its users in one query
+        $task = Task::with('project.users')->find($this->input('task_id'));
+        // If the task or project does not exist, deny access
+        if (!$task || !$task->project) {
+            return false;
         }
 
-        // Get the user's role in the project through the pivot table
-        $userProjectRole = $task->project->users()
-            ->where('user_id', Auth::id())
-            ->first()
-            ->pivot->role ?? null;
-
-        // Only allow users with the role 'tester' to store notes
+        // Get the specific project that this task belongs to
+        $project = $task->project;
+        // Find the authenticated user's role in the project's pivot table
+        $userProject = $project->users()
+            ->where('users.id', Auth::id()) // Avoid ambiguity by specifying the 'users' table
+            ->first();
+        // Check if the user exists in the project and get the role from the pivot table
+        $userProjectRole = $userProject ? $userProject->pivot->role : null;
+        // Only allow users with the 'tester' role to store notes
         return $userProjectRole === 'tester';
     }
 
@@ -41,8 +43,8 @@ class StoreNoteRequest extends FormRequest
     {
         return [
             'note' => ['required', 'string', 'max:5000'],
-            'task_id' => ['required', 'integer', 'exists:tasks,id'],
-            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'task_id' => ['required',  'exists:tasks,id'],
+            'user_id' => ['required',  'exists:users,id'],
         ];
     }
     /**
@@ -78,10 +80,9 @@ class StoreNoteRequest extends FormRequest
     protected function prepareForValidation()
     {
         $task = Task::where('title', $this->input('task_id'))->first();
-
         $this->merge([
             'note' => ucwords(strtolower($this->input('note'))),
-            'user_id' => Auth::user(),
+            'user_id' => Auth::id(),
             'task_id' => $task->id,
         ]);
     }

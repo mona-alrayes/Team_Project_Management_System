@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('notes', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained()->onDelete('cascade')->nullable();
-        });
+            $table->foreignId('user_id')
+            ->nullable() // Allows user_id to be null
+            ->constrained('users') // Sets up the foreign key constraint
+            ->onDelete('cascade');      
+          });
     }
 
     /**

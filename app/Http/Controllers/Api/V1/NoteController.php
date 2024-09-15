@@ -51,7 +51,6 @@ class NoteController extends Controller
     public function store(StoreNoteRequest $request ) 
     {
         $note = $this->NoteService->storeNote($request->validated());
-
         return response()->json([
             'status' => 'success',
             'message' => 'Note created successfully',

@@ -48,6 +48,8 @@ Route::post('projects/{projectId}/users', [ProjectUserController::class, 'addUse
 Route::delete('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'removeUserFromProject']);
 Route::put('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'updateUserInProject']);  //change user role in the project
 Route::get('projects/{projectId}/users', [ProjectUserController::class, 'showUsersInProject']);
+Route::group(['middleware' => 'auth:api'], function () {
 Route::apiResource('notes', NoteController::class)->except(['restoreTask' , 'show']);
 Route::put('notes/{id}/restore', [NoteController::class, 'restoreProject']);
 Route::get('notes/{Task_id}', [NoteController::class, 'show']);
+});
