@@ -24,6 +24,7 @@ class TaskResource extends JsonResource
             'status_changed_at' => $this->status_changed_at,
             'project_name' => $this->project->name ?? null, 
             'assigned_to' => $this->user->name ?? null,
-        ];
+            'notes' => !is_null($this->notes) && $this->notes->isNotEmpty() ? NoteResource::collection($this->notes) : null,
+        ];  
     }
 }

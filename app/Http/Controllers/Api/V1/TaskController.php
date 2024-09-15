@@ -43,7 +43,7 @@ class TaskController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Tasks retrieved successfully',
-            'users' => [
+            'Tasks' => [
                 'info' => TaskResource::collection($tasks['data']),
                 'current_page' => $tasks['current_page'],
                 'last_page' => $tasks['last_page'],
@@ -66,7 +66,7 @@ class TaskController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Task created successfully',
-            'task' => $task,
+            'task' => TaskResource::make($task),
         ], 201); // Created
     }
 

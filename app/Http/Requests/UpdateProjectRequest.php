@@ -25,7 +25,7 @@ class UpdateProjectRequest extends FormRequest
     {
         return [
             'name' => ['nullable', 'string' , 'min:3', 'max:255' , 'unique:projects,id'],
-            'description' => ['nullabe', 'string', 'min:10', 'max:2000'],
+            'description' => ['nullabe', 'string', 'min:10', 'max:5000'],
             'task_id' => ['nullable', 'integer' , 'exists:tasks,id'],
         ];
     }

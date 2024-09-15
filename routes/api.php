@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\NoteController;
 use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\Auth\AuthController;
@@ -47,3 +48,6 @@ Route::post('projects/{projectId}/users', [ProjectUserController::class, 'addUse
 Route::delete('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'removeUserFromProject']);
 Route::put('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'updateUserInProject']);  //change user role in the project
 Route::get('projects/{projectId}/users', [ProjectUserController::class, 'showUsersInProject']);
+Route::apiResource('notes', NoteController::class)->except(['restoreTask' , 'show']);
+Route::put('notes/{id}/restore', [NoteController::class, 'restoreProject']);
+Route::get('notes/{Task_id}', [NoteController::class, 'show']);

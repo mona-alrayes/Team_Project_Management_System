@@ -14,6 +14,12 @@ class NoteResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+           'user' => $this->user->name,
+           'task' => $this->task->title,
+           'note' => $this->note,
+           'created_at' => $this->created_at,
+           'updated_at' => $this->updated_at,
+        ];
     }
 }

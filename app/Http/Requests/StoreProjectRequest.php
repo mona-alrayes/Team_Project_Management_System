@@ -25,7 +25,7 @@ class StoreProjectRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string' , 'min:3', 'max:255' , 'unique:projects,id'],
-            'description' => ['required', 'string', 'min:10', 'max:2000'],
+            'description' => ['required', 'string', 'min:10', 'max:5000'],
         ];
     }
 
@@ -41,7 +41,7 @@ class StoreProjectRequest extends FormRequest
             'required' => 'حقل :attribute مطلوب',
             'string' => 'حقل :attribute يجب أن يكون نصًا وليس أي نوع آخر',
             'max' => 'عدد محارف :attribute لا يجب أن يتجاوز 255 محرفًا',
-            'description.max' => 'لا يجب أن يتجاوز :attribute 2000 محرفًا',
+            'description.max' => 'لا يجب أن يتجاوز :attribute 5000 محرفًا',
             'min' => 'حقل :attribute يجب أن يكون 3 محارف على الأقل',
             'description.min' => 'عدد محارف :attribute لا يقل عن 10 محارف',
         ];

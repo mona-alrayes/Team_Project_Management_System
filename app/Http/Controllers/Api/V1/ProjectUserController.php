@@ -11,6 +11,7 @@ class ProjectUserController extends Controller
     // Add a user to a project
     public function addUserToProject(Request $request, $projectId)
     {
+        #TODO: separate the code into request validation and service 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'role' => 'nullable|string|in:manager,developer,tester',
