@@ -163,4 +163,22 @@ class Task extends Model
     {
         return $query->with(['user', 'project'])->orderBy('updated_at', 'desc')->first();
     }
+
+    // Scope to filter tasks by status
+   public function scopeTasksByStatus($query, $status)
+   {
+       return $query->where('status', $status);
+   }
+
+   // Scope to filter tasks by priority
+   public function scopeTasksByPriority($query, $priority)
+   {
+       return $query->where('priority', $priority);
+   }
+
+   public function scopeHighPriorityWithTitle($query, $title)
+    {
+        return $query->where('priority', 'high')
+                     ->where('title', 'LIKE', '%' . $title . '%');
+    }
 }

@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use Exception;
+use App\Models\User;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
@@ -30,9 +33,10 @@ class ProjectService
     {
         #TODO : 1- be to bring tasks of projects and filter them according to "status" or "priority" 
         try {
-            $projects = Project::with(['user', 'tasks'])
+            $projects = Project::with(['users', 'tasks'])
                 ->paginate(5);
-                
+
+            $projects = Project::with('tasks')->whereRelation('tasks', 'status', 'pending')->get();
             // Throw a ModelNotFoundException if no projects were found
             if ($projects->isEmpty()) {
                 throw new ModelNotFoundException('No projects found.');
@@ -101,23 +105,55 @@ class ProjectService
         }
     }
 
-    public function MyProjects(string $id , $request): Project
+    public function MyProjectTasks($request): array
     {
-        #TODO: 1- be able to bring user project with all tasks belongs to the user "hasManyThrough" relationship .
-        #TODO: 2- be able to filter his project tasks according to "status" or "priority" using "whereRelation" .
-        #TODO: 3- to bring the oldest and newest task of the project .
-        #TODO : 4- to be able to bring the high priority task of the project according to title input condition 
-
         try {
-            $project = Project::findOrFail($id);
-            $project->userTasks();
-            return $project;
+            $id = Auth::id();
+            $user = User::findOrFail($id);
+
+            // Get tasks through the user's projects (this should return a query builder instance)
+            $tasksQuery = $user->tasksThroughProjects();
+
+            $tasksQuery = $tasksQuery
+                // Use scope to filter tasks by status if provided
+                ->when($request->has('status'), function ($query) use ($request) {
+                    return $query->tasksByStatus($request->input('status'));
+                })
+                // Use scope to filter tasks by priority if provided
+                ->when($request->has('priority'), function ($query) use ($request) {
+                    return $query->tasksByPriority($request->input('priority'));
+                })
+                // Filter tasks by high priority and title input condition if provided
+                ->when($request->has('title'), function ($query) use ($request) {
+                    return $query->highPriorityWithTitle($request->input('title'));
+                })->get()->toArray();
+           
+            // TODO 3: think again how to sparate the could using different routes
+
+            // Fetch the project related to the tasks
+            $projects = $user->projects()->with(['tasks'])->get();
+
+            $oldestTask = null;
+            $newestTask = null;
+
+            foreach ($projects as $project) {
+                // Get the oldest and newest tasks for each project
+                $oldestTask = $project->oldestTask ? $project->oldestTask->toArray() : $oldestTask;
+                $newestTask = $project->lastTask ? $project->lastTask->toArray() : $newestTask;
+            }
+
+            return [
+                'tasks' => $tasksQuery, // Array of tasks
+                'oldestTask' => $oldestTask,
+                'newestTask' => $newestTask,
+            ];
         } catch (ModelNotFoundException $e) {
             throw new Exception('Project not found: ' . $e->getMessage());
         } catch (Exception $e) {
             throw new Exception('Failed to retrieve project: ' . $e->getMessage());
         }
     }
+
     /**
      * Update an existing project.
      * 
@@ -191,7 +227,7 @@ class ProjectService
             if (!$project) {
                 throw new Exception('Project not found!');
             }
-            
+
             if ($project->trashed()) {
                 $project->restore();
             }

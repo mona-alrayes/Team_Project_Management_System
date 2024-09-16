@@ -1,13 +1,16 @@
 <?php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Task;
+use App\Models\Project;
 use Laravel\Sanctum\HasApiTokens;
-use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -62,7 +65,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(Task::class)->oldestOfMany();
     }
-
+    public function tasksThroughProjects():HasManyThrough
+    {
+        return $this->hasManyThrough(Task::class, Project_user::class, 'user_id', 'project_id', 'id', 'project_id');
+    }
+    
     // JWT Methods
     public function getJWTIdentifier()
     {

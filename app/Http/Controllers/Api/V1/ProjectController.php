@@ -62,23 +62,23 @@ class ProjectController extends Controller
      */
     public function show(string $id)
     {
-        $project = $this->ProjectService->showProject($id);
+        $tasks = $this->ProjectService->showProject($id);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Project retrieved successfully',
-            'project' => ProjectResource::make($project),
+            'project' => $tasks,
         ], 200); // OK
     }
 
-    public function showMyProjectTasks ( string $id , Request $request)
+    public function showMyProjectTasks (Request $request)
     {
-        $project = $this->ProjectService->MyProjects($id , $request);
+        $project = $this->ProjectService->MyProjectTasks($request);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Project with tasks retrieved successfully',
-            'project' => ProjectResource::make($project),
+            'project' => $project,
         ], 200); // OK
     }
 
