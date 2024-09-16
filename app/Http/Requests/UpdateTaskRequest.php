@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Task;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -14,7 +16,19 @@ class UpdateTaskRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $projectID = $this->route('id'); // Get project ID from route
+        $userID = Auth::id(); // Get the authenticated user ID
+        $user = User::find($userID); // Find the authenticated user
+        
+        // Retrieve the user's role from the pivot table for the specific project
+        $project = $user->projects()->where('project_id', $projectID)->first();
+    
+        if ($project) {
+            $role = $project->pivot->role; // Access role from the pivot table
+            return $role === 'manager'; // Check if the role is 'manager'
+        }
+    
+        return false; // If project not found, deny authorization
     }
 
     /**

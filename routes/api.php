@@ -29,27 +29,28 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 // Admin-only routes
-Route::group(['middleware' => ['auth:api','SystemRole:admin']], function () {
-    Route::apiResource('users', UserController::class)->only(['store','update','delete']);
+Route::group(['middleware' => ['auth:api', 'SystemRole:admin']], function () {
+    Route::apiResource('users', UserController::class)->only(['store', 'update', 'delete']);
     Route::put('users/{id}/restore', [UserController::class, 'restoreUser']);
-    Route::apiResource('tasks', TaskController::class)->except(['updateByAssignedUser','restoreTask']);
-    Route::put('tasks/{id}/restore', [TaskController::class, 'restoreTask']);
-    Route::apiResource('projects', ProjectController::class)->except(['showMyProjectTasks','restoreTask']);
+    Route::apiResource('projects', ProjectController::class)->except(['showMyProjectTasks', 'restoreTask']);
     Route::put('projects/{id}/restore', [ProjectController::class, 'restoreProject']);
+    Route::apiResource('projects.users', ProjectUserController::class)
+        ->only(['store', 'update', 'destroy', 'index']);
 });
 // User-only routes for task status change
 Route::group(['middleware' => 'auth:api'], function () {
-    Route::put('/tasks/{id}/changeStatus', [TaskController::class, 'updateByAssignedUser']);
+    Route::apiResource('projects.tasks', TaskController::class);
+    Route::get('projects/tasks', [ProjectController::class, 'showMyProjectTasks']);
+    Route::patch('projects/{project}/tasks/{task}/changeStatus', [TaskController::class, 'updateByAssignedUser']);
+    Route::post('projects/{project}/tasks/{task}/restore', [TaskController::class, 'restoreTask']);
+    Route::apiResource('notes', NoteController::class)->except(['restoreTask', 'show']);
+    Route::put('notes/{id}/restore', [NoteController::class, 'restoreProject']);
+    Route::get('notes/{Task_id}', [NoteController::class, 'show']);
 });
-Route::apiResource('users', UserController::class)->except(['store','update','delete']);
+Route::apiResource('users', UserController::class)->except(['store', 'update', 'delete']);
 
-Route::post('projects/{projectId}/users', [ProjectUserController::class, 'addUserToProject']);
-Route::delete('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'removeUserFromProject']);
-Route::put('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'updateUserInProject']);  //change user role in the project
-Route::get('projects/{projectId}/users', [ProjectUserController::class, 'showUsersInProject']);
-Route::group(['middleware' => 'auth:api'], function () {
-Route::apiResource('notes', NoteController::class)->except(['restoreTask' , 'show']);
-Route::put('notes/{id}/restore', [NoteController::class, 'restoreProject']);
-Route::get('notes/{Task_id}', [NoteController::class, 'show']);
-Route::get('projects/user/tasks', [ProjectController::class, 'showMyProjectTasks']);
-});
+// Route::post('projects/{projectId}/users', [ProjectUserController::class, 'addUserToProject']);
+// Route::delete('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'removeUserFromProject']);
+// Route::put('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'updateUserInProject']);  //change user role in the project
+// Route::get('projects/{projectId}/users', [ProjectUserController::class, 'showUsersInProject']);
+

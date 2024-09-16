@@ -33,8 +33,8 @@ class ProjectService
     {
         try {
             $projects = Project::with(['users', 'tasks'])
-            ->paginate(5);
-            
+                ->paginate(5);
+
             if ($projects->isEmpty()) {
                 throw new ModelNotFoundException('No projects found.');
             }
@@ -107,7 +107,7 @@ class ProjectService
         try {
             $id = Auth::id();
             $user = User::findOrFail($id);
-         #TODO go back to project methods and think again of better solutions using hasMany
+            #TODO go back to project methods and think again of better solutions using hasMany
             // Get tasks through the user's projects (this should return a query builder instance)
             $tasksQuery = $user->tasksThroughProjects();
 
@@ -124,7 +124,7 @@ class ProjectService
                 ->when($request->has('title'), function ($query) use ($request) {
                     return $query->highPriorityWithTitle($request->input('title'));
                 })->get()->toArray();
-           
+
             // TODO 3: think again how to sparate the could using different routes
 
             // Fetch the project related to the tasks

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Exception;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Collection;
@@ -32,41 +33,41 @@ class TaskService
     {
         try {
 
-         // Check if oldest_task or newest_task is set
-         if ($request->has('oldest_task')) {
-            $oldestTask = Task::oldestTask();
-            if (!$oldestTask) {
-                throw new ModelNotFoundException('No tasks found.');
+            // Check if oldest_task or newest_task is set
+            if ($request->has('oldest_task')) {
+                $oldestTask = Task::oldestTask();
+                if (!$oldestTask) {
+                    throw new ModelNotFoundException('No tasks found.');
+                }
+                return [
+                    'data' => [$oldestTask],
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'per_page' => 1,
+                    'total' => 1,
+                ];
             }
-            return [
-                'data' => [$oldestTask],
-                'current_page' => 1,
-                'last_page' => 1,
-                'per_page' => 1,
-                'total' => 1,
-            ];
-        }
 
-        if ($request->has('newest_task')) {
-            $newestTask = Task::newestTask();
-            if (!$newestTask) {
-                throw new ModelNotFoundException('No tasks found.');
+            if ($request->has('newest_task')) {
+                $newestTask = Task::newestTask();
+                if (!$newestTask) {
+                    throw new ModelNotFoundException('No tasks found.');
+                }
+                return [
+                    'data' => [$newestTask],
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'per_page' => 1,
+                    'total' => 1,
+                ];
             }
-            return [
-                'data' => [$newestTask],
-                'current_page' => 1,
-                'last_page' => 1,
-                'per_page' => 1,
-                'total' => 1,
-            ];
-        }
-        // If no specific oldest/newest task is requested, proceed with regular query and pagination
-        $tasks = Task::with(['user', 'project'])
-            ->when($request->priority, fn($q) => $q->priority($request->priority))
-            ->when($request->status, fn($q) => $q->status($request->status))
-            ->when($request->sort_order, fn($q) => $q->sortByDueDate($request->sort_order))
-            ->paginate(5);
-        
+            // If no specific oldest/newest task is requested, proceed with regular query and pagination
+            $tasks = Task::with(['user', 'project'])
+                ->when($request->priority, fn($q) => $q->priority($request->priority))
+                ->when($request->status, fn($q) => $q->status($request->status))
+                ->when($request->sort_order, fn($q) => $q->sortByDueDate($request->sort_order))
+                ->paginate(5);
+
             // Throw a ModelNotFoundException if no tasks were found
             if ($tasks->isEmpty()) {
                 throw new ModelNotFoundException('No tasks found.');
@@ -152,9 +153,34 @@ class TaskService
     public function updateTask(array $data, string $id): Task
     {
         try {
+            $userId = Auth::id(); // Get the ID of the authenticated user
+            $user = User::findOrFail($userId); // Find the authenticated user
             $task = Task::findOrFail($id);
-
             $task->update(array_filter($data));
+            // Get the project associated with the task
+            $project = $task->project;
+            // Check if the user is associated with the project
+            if ($user->projects->contains($project)) {
+                // Retrieve the existing distribution_hours value
+                $pivotData = $user->projects()->where('project_id', $project->id)->first()->pivot;
+
+                // Determine the new distribution_hours value
+                $newDistributionHours = $pivotData->distribution_hours === null
+                    ? 0
+                    : $pivotData->distribution_hours + 2;
+
+                // Update the pivot table
+                $user->projects()->updateExistingPivot($project->id, [
+                    'last_activity' => now(),
+                    'distribution_hours' => $newDistributionHours,
+                ]);
+            } else {
+                // Attach a new record to the pivot table if it doesn't exist
+                $user->projects()->attach($project->id, [
+                    'last_activity' => now(),
+                    'distribution_hours' => null,
+                ]);
+            }
 
             return $task;
         } catch (ModelNotFoundException $e) {
@@ -181,9 +207,39 @@ class TaskService
     public function updateStatus(array $data, string $id): Task
     {
         try {
-            $task = Task::findOrFail($id);
-            $task->status_changed_at= now();
+            $userId = Auth::id(); // Get the ID of the authenticated user
+            $user = User::findOrFail($userId); // Find the authenticated user
+            $task = Task::findOrFail($id); // Find the task
+
+            // Update the task status and other fields
+            $task->status_changed_at = now();
             $task->update(array_filter($data));
+
+            // Get the project associated with the task
+            $project = $task->project;
+
+            // Check if the user is associated with the project
+            if ($user->projects->contains($project)) {
+                // Retrieve the existing distribution_hours value
+                $pivotData = $user->projects()->where('project_id', $project->id)->first()->pivot;
+
+                // Determine the new distribution_hours value
+                $newDistributionHours = $pivotData->distribution_hours === null
+                    ? 0
+                    : $pivotData->distribution_hours + 12;   // assuming developer tasks 12 hours for everychange
+
+                // Update the pivot table
+                $user->projects()->updateExistingPivot($project->id, [
+                    'last_activity' => now(),
+                    'distribution_hours' => $newDistributionHours,
+                ]);
+            } else {
+                // Attach a new record to the pivot table if it doesn't exist
+                $user->projects()->attach($project->id, [
+                    'last_activity' => now(),
+                    'distribution_hours' => null,
+                ]);
+            }
 
             return $task;
         } catch (ModelNotFoundException $e) {
@@ -228,7 +284,7 @@ class TaskService
             if (!$task) {
                 throw new Exception('Task not found!');
             }
-            if($task && $task->trashed()){
+            if ($task && $task->trashed()) {
                 $task->restore();
             }
             return [
