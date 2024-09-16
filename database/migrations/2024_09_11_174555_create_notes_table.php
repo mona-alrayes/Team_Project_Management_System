@@ -16,6 +16,7 @@ return new class extends Migration
             $table->text('note');
             $table->unsignedBigInteger('task_id');
             $table->foreign('task_id')->references('id')->on('tasks')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');      
             $table->timestamps();
             $table->softDeletes(); 
         });
