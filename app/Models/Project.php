@@ -27,9 +27,9 @@ class Project extends Model
     {
         return $this->belongsToMany(User::class)->withPivot('role', 'contribution_hours', 'last_activity');
     }
-
+#TODO go back here there is alot of logic and work to todo
     // Define the most recent task
-    public function lastTask()
+    public function newestTask()
     {
         return $this->hasOne(Task::class)->latestOfMany();
     }
@@ -40,24 +40,24 @@ class Project extends Model
         return $this->hasOne(Task::class)->oldestOfMany();
     }
 
-   // Scope to filter tasks by status
-   public function scopeTasksByStatus($query, $status)
-   {
-       return $query->where('status', $status);
-   }
+    // Scope to filter tasks by status
+    public function TasksByStatus($status)
+    {
+        return $this->tasks()->where('status', $status)->get();
+    }
 
-   // Scope to filter tasks by priority
-   public function scopeTasksByPriority($query, $priority)
-   {
-       return $query->where('priority', $priority);
-   }
+    // Scope to filter tasks by priority
+    public function TasksByPriority($priority)
+    {
+        return $this->tasks()->where('priority', $priority)->get();
+    }
 
-   public function highPriorityWithTitle($title)
-   {
-       return $this->hasOne(Task::class)
-                   ->ofMany([], function ($query) use ($title) {
-                       $query->where('priority', 'high')
-                             ->where('title', 'LIKE', '%' . $title . '%');
-                   });
-   }
+    public function highPriorityWithTitle($title)
+    {
+        return $this->hasOne(Task::class)
+            ->ofMany([], function ($query) use ($title) {
+                $query->where('priority', 'high')
+                    ->where('title', 'LIKE', '%' . $title . '%');
+            });
+    }
 }

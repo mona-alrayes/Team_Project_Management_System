@@ -31,13 +31,10 @@ class ProjectService
      */
     public function getAllProjects(Request $request): array
     {
-        #TODO : 1- be to bring tasks of projects and filter them according to "status" or "priority" 
         try {
             $projects = Project::with(['users', 'tasks'])
-                ->paginate(5);
-
-            $projects = Project::with('tasks')->whereRelation('tasks', 'status', 'pending')->get();
-            // Throw a ModelNotFoundException if no projects were found
+            ->paginate(5);
+            
             if ($projects->isEmpty()) {
                 throw new ModelNotFoundException('No projects found.');
             }
@@ -110,7 +107,7 @@ class ProjectService
         try {
             $id = Auth::id();
             $user = User::findOrFail($id);
-
+         #TODO go back to project methods and think again of better solutions using hasMany
             // Get tasks through the user's projects (this should return a query builder instance)
             $tasksQuery = $user->tasksThroughProjects();
 
@@ -139,7 +136,7 @@ class ProjectService
             foreach ($projects as $project) {
                 // Get the oldest and newest tasks for each project
                 $oldestTask = $project->oldestTask ? $project->oldestTask->toArray() : $oldestTask;
-                $newestTask = $project->lastTask ? $project->lastTask->toArray() : $newestTask;
+                $newestTask = $project->newestTask ? $project->newestTask->toArray() : $newestTask;
             }
 
             return [
