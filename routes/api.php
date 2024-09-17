@@ -49,6 +49,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     // ----- develper can change the task status and the role is handled in form request -----------------------------
     Route::patch('projects/{project}/tasks/{task}/changeStatus', [TaskController::class, 'updateByAssignedUser']);
     //------------------------------------------------------------------------------------------------------------------
+    Route::apiResource('projects.tasks', TaskController::class)->only(['index','show','update','destroy']);
     Route::post('projects/{project}/tasks/{task}/restore', [TaskController::class, 'restoreTask']);
     //---- tester can add notes , update it or delete it depending on the role that's been tested in form request ----------------
     Route::apiResource('notes', NoteController::class)->except(['restoreNote', 'show']);
