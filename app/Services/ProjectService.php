@@ -31,15 +31,14 @@ class ProjectService
     public function getAllProjects(): array
     {
         try {
-            $projects=Project::with(['tasks'])->paginate(5);
-            return[
+            $projects = Project::with(['tasks'])->paginate(5);
+            return [
                 'data' => $projects->items(), // The items on the current page
                 'current_page' => $projects->currentPage(),
                 'last_page' => $projects->lastPage(),
                 'per_page' => $projects->perPage(),
                 'total' => $projects->total(),
             ];
-          
         } catch (Exception $e) {
             throw new Exception('Failed to retrieve projects: ' . $e->getMessage());
         }
@@ -95,16 +94,27 @@ class ProjectService
             throw new Exception('Failed to retrieve project: ' . $e->getMessage());
         }
     }
-
+    /**
+     * Retrieve tasks from a user's projects with optional filtering by status, priority, and title.
+     * 
+     * @param Request $request
+     * The request object containing optional filters (status, priority, title).
+     * 
+     * @return array
+     * An array containing the tasks, oldest task, and newest task.
+     * 
+     * @throws \Exception
+     * Throws an exception if retrieval fails.
+     */
     public function MyProjectTasks($request): array
     {
         try {
             $id = Auth::id();
             $user = User::findOrFail($id);
-            #TODO go back to project methods and think again of better solutions using hasMany
+
             // Get tasks through the user's projects (this should return a query builder instance)
             $tasksQuery = $user->tasksThroughProjects();
-            
+
             $tasksQuery = $tasksQuery
                 // Use scope to filter tasks by status if provided
                 ->when($request->has('status'), function ($query) use ($request) {
@@ -113,7 +123,6 @@ class ProjectService
                 // Use scope to filter tasks by priority if provided
                 ->when($request->has('priority'), function ($query) use ($request) {
                     return Project::whereRelation('tasks', 'priority', $request->input('priority'));
-
                 })
                 // Filter tasks by high priority and title input condition if provided
                 ->when($request->has('title'), function ($query) use ($request) {
