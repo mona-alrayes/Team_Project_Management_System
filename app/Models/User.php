@@ -65,6 +65,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(Task::class)->oldestOfMany();
     }
+    //returns tasks related to the project user belongs to
     public function tasksThroughProjects():HasManyThrough
     {
         return $this->hasManyThrough(Task::class, Project_user::class, 'user_id', 'project_id', 'id', 'project_id');
