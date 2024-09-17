@@ -22,9 +22,9 @@ class TaskResource extends JsonResource
             'status' => $this->status,
             'due_date' => $this->due_date,
             'status_changed_at' => $this->status_changed_at,
-            'project_name' => $this->project->name ?? null, 
-            'assigned_to' => $this->user->name ?? null,
-            'notes' => !is_null($this->notes) && $this->notes->isNotEmpty() ? NoteResource::collection($this->notes) : null,
+            'project_name' =>  $this->whenLoaded('project', fn() => $this->project->name), 
+            'assigned_to' => $this->whenLoaded('user', fn() => $this->user->name),
+            'notes' => $this->whenLoaded('notes', fn() => $this->notes->isNotEmpty() ? NoteResource::collection($this->notes) : null),
         ];  
     }
 }
