@@ -17,17 +17,12 @@ class StoreTaskRequest extends FormRequest
     {
         $projectID = $this->route('id'); // Get project ID from route
         $userID = Auth::id(); // Get the authenticated user ID
-        $user = User::find($userID); // Find the authenticated user
+        $user = User::findOrFail($userID); // Find the authenticated user
         
         // Retrieve the user's role from the pivot table for the specific project
         $project = $user->projects()->where('project_id', $projectID)->first();
     
-        if ($project) {
-            $role = $project->pivot->role; // Access role from the pivot table
-            return $role === 'manager'; // Check if the role is 'manager'
-        }
-    
-        return false; // If project not found, deny authorization
+        return $project && $project->pivot->role === 'manager'; // Check if the user has a manager role
     }
 
     /**
@@ -63,7 +58,7 @@ class StoreTaskRequest extends FormRequest
             'min' => 'حقل :attribute يجب أن يكون 3 محارف على الأقل',
             'description.min' => 'عدد محارف :attribute لا يقل عن 10 محارف',
             'priority.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: high, medium, low',
-            'status.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: pending, in-progress, completed',
+            'status.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: pending, in_progress, completed',
             'date_format' => 'حقل :attribute يجب أن يكون بصيغة تاريخ صحيحة مثل :format',
             'after_or_equal' => 'لا يمكن أن يكون :attribute تاريخًا في الماضي',
             'exists' => 'القيمة المحددة في حقل :attribute غير موجودة'
@@ -87,14 +82,16 @@ class StoreTaskRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation()
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
     {
         // In input form user input the name of the person to assign the task to and here we get the object of this person to get the id of it 
         $user = User::where('name', $this->input('assigned_to'))->first();
        
         $this->merge([
             'title' => ucwords(strtolower($this->input('title'))),
-            'description' => ucwords(strtolower($this->input('description'))),
             'assigned_to' => $user ? $user->id : null,
             'status' => 'pending',
         ]);
@@ -106,7 +103,7 @@ class StoreTaskRequest extends FormRequest
      * @param \Illuminate\Contracts\Validation\Validator $validator
      * @throws \Illuminate\Http\Exceptions\HttpResponseException
      */
-    protected function failedValidation(Validator $validator)
+    protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(response()->json([
             'status'  => 'خطأ',
