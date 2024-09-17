@@ -1,47 +1,36 @@
 <?php
 
 namespace App\Http\Controllers\Api\V1;
+
 use App\Http\Controllers\Controller;
-use App\Models\Project;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Services\ProjectUserService;
+use App\Http\Requests\StoreUserToProjectRequest;
+use App\Http\Requests\UpdateUserToProjectRequest;
 
 class ProjectUserController extends Controller
 {
-    // Add a user to a project
-    public function addUserToProject(Request $request, $projectId)
-    {
-        #TODO: separate the code into request validation and service 
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'role' => 'nullable|string|in:manager,developer,tester',
-        ]);
+    protected $projectUserService;
 
-        $project = Project::findOrFail($projectId);
-        $project->users()->attach($validated['user_id'], [
-            'role' => $validated['role'],
-            'created_at' => now(),
-            'updated_at' => now(),
-            'last_activity' => now(),
-            'distribution_hours'=> null,
-        ]);
+    public function __construct(ProjectUserService $projectUserService)
+    {
+        $this->projectUserService = $projectUserService;
+    }
+
+    // Add a user to a project
+    public function addUserToProject(StoreUserToProjectRequest $request, $projectId)
+    {
+        $this->projectUserService->addUserToProject($projectId, $request->validated());
 
         return response()->json([
             'status' => 'success',
             'message' => 'User added to project successfully.',
-            'info' => [
-                'project' => $project->name,
-                'user' =>$validated['user_id'],
-                'role' => $validated['role'],
-            ]
         ], 200);
     }
 
     // Remove a user from a project
     public function removeUserFromProject($projectId, $userId)
     {
-        $project = Project::findOrFail($projectId);
-        $project->users()->detach($userId);
+        $this->projectUserService->removeUserFromProject($projectId, $userId);
 
         return response()->json([
             'status' => 'success',
@@ -50,14 +39,9 @@ class ProjectUserController extends Controller
     }
 
     // Update a user's role or contribution hours in a project
-    public function updateUserInProject(Request $request, $projectId, $userId)
+    public function updateUserInProject(UpdateUserToProjectRequest $request, $projectId, $userId)
     {
-        $validated = $request->validate([
-            'role' => 'nullable|string|in:manager,developer,tester',
-        ]);
-
-        $project = Project::findOrFail($projectId);
-        $project->users()->updateExistingPivot($userId, $validated);
+        $this->projectUserService->updateUserInProject($projectId, $userId, $request->validated());
 
         return response()->json([
             'status' => 'success',
@@ -68,8 +52,7 @@ class ProjectUserController extends Controller
     // Show users in a project
     public function showUsersInProject($projectId)
     {
-        $project = Project::findOrFail($projectId);
-        $users = $project->users()->get();
+        $users = $this->projectUserService->showUsersInProject($projectId);
 
         return response()->json([
             'status' => 'success',
@@ -77,4 +60,3 @@ class ProjectUserController extends Controller
         ], 200);
     }
 }
-
