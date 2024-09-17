@@ -24,12 +24,13 @@ class UpdateProjectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'string' , 'min:3', 'max:255' , 'unique:projects,id'],
+            'name' => ['sometimes', 'string', 'min:3', 'max:255', 'unique:projects,name,' . $this->route('id')],
             'description' => ['sometimes', 'string', 'min:10', 'max:5000'],
-            'task_id' => ['nullable', 'integer' , 'exists:tasks,id'],
+            'task_id' => ['nullable', 'integer', 'exists:tasks,id'],
         ];
     }
-         /**
+
+    /**
      * Get the custom error messages for the validator.
      *
      * @return array<string, string>
@@ -37,14 +38,14 @@ class UpdateProjectRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'unique' => 'حقل :arrtibute موجود من قبل',
+            'unique' => 'حقل :attribute موجود من قبل',
             'string' => 'حقل :attribute يجب أن يكون نصًا وليس أي نوع آخر',
             'max' => 'عدد محارف :attribute لا يجب أن يتجاوز 255 محرفًا',
             'description.max' => 'لا يجب أن يتجاوز :attribute 2000 محرفًا',
             'min' => 'حقل :attribute يجب أن يكون 3 محارف على الأقل',
             'description.min' => 'عدد محارف :attribute لا يقل عن 10 محارف',
-            'integer'=> 'حقل :attribute يجب ان يكون رقما',
-            'exists' => 'هذا الرقم موجود مسبقا في قاعدة البيانات',
+            'integer' => 'حقل :attribute يجب أن يكون رقماً',
+            'exists' => 'هذا الرقم موجود مسبقاً في قاعدة البيانات',
         ];
     }
 
@@ -58,13 +59,8 @@ class UpdateProjectRequest extends FormRequest
         return [
             'name' => 'المشروع',
             'description' => 'الوصف',
-            'task_id' => 'ععرف المهمة',
+            'task_id' => 'معرف المهمة',
         ];
-    }
-
-    protected function prepareForValidation()
-    {
-        
     }
 
     /**
@@ -76,11 +72,9 @@ class UpdateProjectRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'status'  => 'خطأ',
+            'status' => 'خطأ',
             'message' => 'فشلت عملية التحقق من صحة البيانات.',
-            'errors'  => $validator->errors(),
+            'errors' => $validator->errors(),
         ], 422));
     }
-    
-    
 }
