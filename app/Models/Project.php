@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
@@ -27,31 +26,18 @@ class Project extends Model
     {
         return $this->belongsToMany(User::class)->withPivot('role', 'contribution_hours', 'last_activity');
     }
-#TODO go back here there is alot of logic and work to todo
-    // Define the most recent task
+   // returns the lastest task 
     public function newestTask()
     {
         return $this->hasOne(Task::class)->latestOfMany();
     }
 
-    // Define the oldest task
+    // returns the oldest task
     public function oldestTask()
     {
         return $this->hasOne(Task::class)->oldestOfMany();
     }
-
-    // Scope to filter tasks by status
-    public function TasksByStatus($status)
-    {
-        return $this->tasks()->where('status', $status)->get();
-    }
-
-    // Scope to filter tasks by priority
-    public function TasksByPriority($priority)
-    {
-        return $this->tasks()->where('priority', $priority)->get();
-    }
-
+ // returns task that has the highest priority that has title condition using  hasOne --- ofMany
     public function highPriorityWithTitle($title)
     {
         return $this->hasOne(Task::class)
