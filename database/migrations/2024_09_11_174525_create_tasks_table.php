@@ -17,7 +17,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'in_progress', 'completed'])->default('pending');
             $table->text('description');
             $table->dateTime('due_date'); 
-            $table->unsignedBigInteger('project_id');
+            $table->unsignedBigInteger('project_id'); // there must be project first before making tasks available
             $table->unsignedBigInteger('assigned_to')->nullable();
             $table->foreign('assigned_to')->references('id')->on('users')->onDelete('set null');
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
