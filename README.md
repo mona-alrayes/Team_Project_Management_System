@@ -1,12 +1,16 @@
-# Task Management API  Project
+# Team Project Management System
 
 ## Description
-This project is a ** Task Management System ** built with **Laravel 10** that provides a **RESTful API**f for managing Tasks and Borrowing them . It allows users to perform **CRUD operations** ( Read, show , update ) on tasks and only change the status of the task for the user that the task was assigned to , with the ability to filter tasks by **priority** and **status** sort them by **Due_date** (ascending and descending), or apply both filtering and sorting simultaneously . Admin to perform **CRUD operations** on tasks like (create and update and delete) , and also Manager can assign tasks using Update . The system Has **JWT Authentication** for ( Register , login , logout , refresh)  . The project follows **repository design patterns** and incorporates **clean code** and **refactoring principles**.
+This project is a ** Team Project Management System ** built with **Laravel 10** that provides a **RESTful API**  for managing teams in projects with different roles so they can do their job effiently . The system Has **JWT Authentication** for ( Register , login , logout , refresh)  . The project follows **repository design patterns** and incorporates **clean code** and **refactoring principles**.
 
 ### Key Features:
-- **CRUD Operations**: Create, read, update, and delete tasks in the Book library.
-- **CRUD Operations**: Create, read, update, and delete Users in the Book library.
-- **Filtering and Sorting**: Filter books by priority, status of the task  , sort them by Due_date , or do all.
+- **CRUD Operations**: Create, read, update, delete and restore tasks .
+- **CRUD Operations**: Create, read, update, delete , restore for Users .
+- **CRUD Operations**: Create, read, update, delete , restore for Projects .
+- **CRUD Operations**: Create, read, update, delete , restore for Notes .
+- **Operations on Pivot Table Project_user** : add user with role , remove it and update it .
+- **Operations for Authentication** : register, login , logout and refresh .
+
 - **Repository Design Pattern**: Implements repositories and services for clean separation of concerns.
 - **Form Requests**: Validation is handled by custom form request classes.
 - **API Response Service**: Unified responses for API endpoints.
@@ -39,10 +43,10 @@ Ensure you have the following installed on your machine:
 
 1. Clone the Repository  
    ```bash
-   https://github.com/mona-alrayes/Task_Management_API
+   https://github.com/mona-alrayes/Team_Project_Management_System
 2. Navigate to the Project Directory
    ```bash
-   cd Task_Management_API
+   cd Team_Project_Management_System
 3. Install Dependencies
    ```bash
    composer install
