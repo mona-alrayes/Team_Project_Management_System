@@ -24,7 +24,9 @@ class ProjectController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * Display a listing of all projects.
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -44,7 +46,10 @@ class ProjectController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created project in storage.
+     *
+     * @param StoreProjectRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreProjectRequest $request)
     {
@@ -58,7 +63,10 @@ class ProjectController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified project by ID.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(string $id)
     {
@@ -71,7 +79,13 @@ class ProjectController extends Controller
         ], 200); // OK
     }
 
-    public function getMyProjectTasks (Request $request)
+    /**
+     * Display the authenticated user's tasks in a specific project.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMyProjectTasks(Request $request)
     {
         $project = $this->ProjectService->MyProjectTasks($request);
 
@@ -79,7 +93,7 @@ class ProjectController extends Controller
             'status' => 'success',
             'message' => 'Project with tasks retrieved successfully',
             'project' => [
-                'Tasks'=>$project['tasks'],
+                'Tasks' => $project['tasks'],
                 'Oldest Task' => $project['oldestTask'],
                 'Newest Task' => $project['newestTask'],
             ],
@@ -87,7 +101,11 @@ class ProjectController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified project in storage.
+     *
+     * @param UpdateProjectRequest $request
+     * @param string $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateProjectRequest $request, string $id)
     {
@@ -101,7 +119,10 @@ class ProjectController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified project from storage.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(string $id)
     {
@@ -115,8 +136,11 @@ class ProjectController extends Controller
 
     /**
      * Restore a soft-deleted project.
+     *
+     * @param string $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function restoreProject($id): \Illuminate\Http\JsonResponse
+    public function restoreProject(string $id)
     {
         $message = $this->ProjectService->restoreProject($id);
 
@@ -127,3 +151,4 @@ class ProjectController extends Controller
         ], 200); // OK
     }
 }
+
