@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Models\User;
+
 use App\Services\UserService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
@@ -140,7 +140,6 @@ class UserController extends Controller
             'status' => $message['status'],
             'message' => $message['message'],
             'user' => new UserResource($message['user']),
-        ], 200); // OK
-       
+        ], 200); // OK  
     }
 }
