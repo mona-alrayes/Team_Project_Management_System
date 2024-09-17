@@ -49,7 +49,7 @@ class UpdateUSerRequest extends FormRequest
             'email.unique' => 'هذا :attribute موجود بالفعل في بياناتنا',
             'min' => 'حقل :attribute يجب أن يكون 8 محارف على الأقل',
             'password.confirmed' => 'حقل تأكيد :attribute غير مطابق لحقل :attribute',
-            'role.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: admin, manager, user',
+            'system_role.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: admin,user',
         ];
     }
 
@@ -83,11 +83,6 @@ class UpdateUSerRequest extends FormRequest
                 'name' => ucwords(strtolower($this->input('name'))),
             ]);
          } 
-        // else {
-        //     $this->merge([
-        //         'system_role' => $this->input('role', 'user'),
-        //     ]);
-        // }
     }
 
     /**
