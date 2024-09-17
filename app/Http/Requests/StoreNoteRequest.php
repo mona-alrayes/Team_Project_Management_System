@@ -15,8 +15,9 @@ class StoreNoteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Load the task and the related project with its users in one query
+        // Load the task with its related project and users
         $task = Task::with('project.users')->find($this->input('task_id'));
+        
         // If the task or project does not exist, deny access
         if (!$task || !$task->project) {
             return false;
@@ -24,12 +25,15 @@ class StoreNoteRequest extends FormRequest
 
         // Get the specific project that this task belongs to
         $project = $task->project;
+
         // Find the authenticated user's role in the project's pivot table
         $userProject = $project->users()
             ->where('users.id', Auth::id()) // Avoid ambiguity by specifying the 'users' table
             ->first();
+
         // Check if the user exists in the project and get the role from the pivot table
         $userProjectRole = $userProject ? $userProject->pivot->role : null;
+
         // Only allow users with the 'tester' role to store notes
         return $userProjectRole === 'tester';
     }
@@ -43,10 +47,11 @@ class StoreNoteRequest extends FormRequest
     {
         return [
             'note' => ['required', 'string', 'max:5000'],
-            'task_id' => ['required',  'exists:tasks,id'],
-            'user_id' => ['required',  'exists:users,id'],
+            'task_id' => ['required', 'exists:tasks,id'],
+            'user_id' => ['required', 'exists:users,id'],
         ];
     }
+
     /**
      * Get the custom error messages for the validator.
      *
@@ -57,8 +62,8 @@ class StoreNoteRequest extends FormRequest
         return [
             'required' => 'حقل :attribute مطلوب',
             'string' => 'حقل :attribute يجب أن يكون نصًا وليس أي نوع آخر',
-            'integer' => 'حقل :attribute يحب ان يكون رقما',
-            'exists' => 'القيمة المحددة في حقل :attribute غير موجودة'
+            'max' => 'حقل :attribute يجب ألا يتجاوز :max حرفًا',
+            'exists' => 'القيمة المحددة في حقل :attribute غير موجودة',
         ];
     }
 
@@ -76,14 +81,20 @@ class StoreNoteRequest extends FormRequest
         ];
     }
 
-
+    /**
+     * Prepare the data for validation.
+     */
     protected function prepareForValidation()
     {
-        $task = Task::where('title', $this->input('task_id'))->first();
+        // Assume task ID is provided in the input; adjust as needed
+        $taskId = $this->input('task_id');
+        $task = Task::find($taskId);
+
+        // Ensure `note` is properly formatted and set `user_id` to the authenticated user ID
         $this->merge([
             'note' => ucwords(strtolower($this->input('note'))),
             'user_id' => Auth::id(),
-            'task_id' => $task->id,
+            'task_id' => $task ? $task->id : $taskId, // Ensure task ID is valid
         ]);
     }
 
@@ -96,9 +107,9 @@ class StoreNoteRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'status'  => 'خطأ',
+            'status' => 'خطأ',
             'message' => 'فشلت عملية التحقق من صحة البيانات.',
-            'errors'  => $validator->errors(),
+            'errors' => $validator->errors(),
         ], 422));
     }
 }
