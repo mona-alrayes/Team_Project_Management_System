@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\NoteController;
 use App\Http\Controllers\Api\V1\TaskController;
@@ -30,46 +29,42 @@ Route::controller(AuthController::class)->group(function () {
 
 // Admin-only routes
 Route::group(['middleware' => ['auth:api', 'SystemRole:admin']], function () {
+    // --------admin can create , delete and restore users accounts ---------------------------------------------------------
     Route::apiResource('users', UserController::class)->only(['store', 'update', 'delete']);
     Route::put('users/{id}/restore', [UserController::class, 'restoreUser']);
-     Route::post('projects/{projectId}/users', [ProjectUserController::class, 'addUserToProject']);
-     Route::delete('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'removeUserFromProject']);
-     Route::put('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'updateUserInProject']);  //change user role in the project
-     Route::get('projects/{projectId}/users', [ProjectUserController::class, 'showUsersInProject']);
-
+    //----------------------------------------------------------------------------------------------------------------------
+    //------- admin can add users to projects , remove them or update them to pivot table -----------------------------------
+    Route::post('projects/{projectId}/users', [ProjectUserController::class, 'addUserToProject']);
+    Route::delete('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'removeUserFromProject']);
+    Route::put('projects/{projectId}/users/{userId}', [ProjectUserController::class, 'updateUserInProject']);  //change user role in the project
+    Route::get('projects/{projectId}/users', [ProjectUserController::class, 'showUsersInProject']);
+    //------------------------------------------------------------------------------------------------------------------------
+    //--------- admin can add , update or delete or restore projects ---------------------------------------------------
+    Route::apiResource('projects', ProjectController::class)->only(['store', 'update', 'delete']);
+    Route::put('projects/{id}/restore', [ProjectController::class, 'restoreProject']);
+    //-----------------------------------------------------------------------------------------------------------------------
 });
 // User-only routes for task status change
 Route::group(['middleware' => 'auth:api'], function () {
+    // ----- develper can change the task status and the role is handled in form request -----------------------------
     Route::patch('projects/{project}/tasks/{task}/changeStatus', [TaskController::class, 'updateByAssignedUser']);
+    //------------------------------------------------------------------------------------------------------------------
     Route::post('projects/{project}/tasks/{task}/restore', [TaskController::class, 'restoreTask']);
-    Route::apiResource('notes', NoteController::class)->except(['restoreTask', 'show']);
+    //---- tester can add notes , update it or delete it depending on the role that's been tested in form request ----------------
+    Route::apiResource('notes', NoteController::class)->except(['restoreNote', 'show']);
     Route::put('notes/{id}/restore', [NoteController::class, 'restoreProject']);
+    //---- auth user can see notes on task ------------------------------------
     Route::get('notes/{Task_id}', [NoteController::class, 'show']);
+    //--------------------------------------------------------------------------------------
+    // Custom Route - Get a user's project tasks using hasManyThrough Relationship---------------------------------------------------------
+    Route::get('projects/showMyTasks', [ProjectController::class, 'getMyProjectTasks'])->name('projects.getMyProjectTasks');
+    //----------------------------------------------------------------------------------------------------
+    // Index - Get all projects --------------------------------------------------------------------------
+    Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
+    //----------------------------------------------------------------------------------------------------
+    // Show - Get a specific project by ID ---------------------------------------------------------------
+    Route::get('projects/{id}', [ProjectController::class, 'show'])->name(name: 'projects.show');
+    // --------------- index and show for users --------------------------------------------------------------
+    Route::apiResource('users', UserController::class)->except(['store', 'update', 'delete']);
+    //---------------------------------------------------------------------------------------------------------------------------
 });
-Route::apiResource('users', UserController::class)->except(['store', 'update', 'delete']);
-
-
-
-// --------- routes of project Controller --------------------------------------------
-Route::group(['middleware' => 'auth:api'], function () {
-// Custom Route - Get a user's project tasks
-Route::get('projects/showMyTasks', [ProjectController::class, 'getMyProjectTasks'])->name('projects.getMyProjectTasks');
-// Index - Get all projects
-Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
-// Show - Get a specific project by ID
-Route::get('projects/{id}', [ProjectController::class, 'show'])->name(name: 'projects.show');
-
-});
-
-Route::group(['middleware' => ['auth:api', 'SystemRole:admin']], function () {
-// Store - Create a new project
-Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
-// Update - Update a specific project by ID
-Route::put('projects/{id}', [ProjectController::class, 'update'])->name('projects.update');
-// Destroy - Delete a specific project by ID
-Route::delete('projects/{id}', [ProjectController::class, 'destroy'])->name('projects.destroy');
-// Restore - Restore a specific project by ID
-Route::put('projects/{id}/restore', [ProjectController::class, 'restoreProject']);
-
-});
-//---------------------------------------------------------
