@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
@@ -18,17 +17,12 @@ class UpdateTaskRequest extends FormRequest
     {
         $projectID = $this->route('id'); // Get project ID from route
         $userID = Auth::id(); // Get the authenticated user ID
-        $user = User::find($userID); // Find the authenticated user
-        
+        $user = User::findOrFail($userID); // Find the authenticated user
+
         // Retrieve the user's role from the pivot table for the specific project
         $project = $user->projects()->where('project_id', $projectID)->first();
-    
-        if ($project) {
-            $role = $project->pivot->role; // Access role from the pivot table
-            return $role === 'manager'; // Check if the role is 'manager'
-        }
-    
-        return false; // If project not found, deny authorization
+
+        return $project && $project->pivot->role === 'manager'; // Check if the user has a manager role
     }
 
     /**
@@ -41,9 +35,9 @@ class UpdateTaskRequest extends FormRequest
         return [
             'title' => ['sometimes', 'string', 'min:3', 'max:255'],
             'description' => ['sometimes', 'string', 'min:10', 'max:2000'],
-            'priority' => ['sometimes', 'string', 'in:highest,high,medium,low,lowest'],
+            'priority' => ['sometimes', 'string', 'in:high,medium,low'],
             'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
-            'status' => ['sometimes', 'string', 'in:To Do,In progress,Done'],
+            'status' => ['sometimes', 'string', 'in:pending,in_progress,completed'],
             'due_date' => ['sometimes', 'date_format:d-m-Y H:i'],
         ];
     }
@@ -61,9 +55,9 @@ class UpdateTaskRequest extends FormRequest
             'description.max' => 'لا يجب ان يتجاوز :attribute 2000 محرفا',
             'min' => 'حقل :attribute يجب أن يكون 3 محارف على الأقل',
             'description.min' => 'عدد محارف :attribute لا يقل عن 10 محارف',
-            'priority.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: highest, high,medium,low, lowest',
-            'status.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: To Do, progress, Done',
-            'date' => 'حقل :attribute يجب ان يكون بصيغة تاريخ ',
+            'priority.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: high, medium, low',
+            'status.in' => 'حقل :attribute يجب أن يكون واحدًا من القيم التالية: pending, in_progress, completed',
+            'date_format' => 'حقل :attribute يجب أن يكون بصيغة تاريخ صحيحة مثل :format',
         ];
     }
 
@@ -76,20 +70,20 @@ class UpdateTaskRequest extends FormRequest
     {
         return [
             'title' => 'عنوان المهمة',
-            'description' => 'المهمة',
+            'description' => 'الوصف',
             'priority' => 'الأولوية',
-            'assigned_to' => 'مسند الى ',
+            'assigned_to' => 'المعين إلى',
             'status' => 'الحالة',
-            'due_date' => 'تاريخ الانجاز'
+            'due_date' => 'تاريخ الاستحقاق',
         ];
     }
 
-    protected function prepareForValidation()
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
     {
-        $user = null;
-
         if ($this->filled('assigned_to')) {
-            // Get the user by name if assigned_to is provided
             $user = User::where('name', $this->input('assigned_to'))->first();
             if (!$user) {
                 throw new HttpResponseException(response()->json([
@@ -98,15 +92,14 @@ class UpdateTaskRequest extends FormRequest
                     'errors' => ['assigned_to' => ['User not found']],
                 ], 422));
             }
+            $this->merge(['assigned_to' => $user->id]);
         }
-        // Merge the transformed inputs
+
         $this->merge([
-            'title' => ucwords(strtolower($this->input('title'))),
-            'description' => ucwords(strtolower($this->input('description'))),
-            'assigned_to' => $user ? $user->id : null,
+            'title' => ucwords(strtolower($this->input('title', ''))),
+            'description' => ucwords(strtolower($this->input('description', ''))),
         ]);
     }
-
 
     /**
      * Handle a failed validation attempt.
@@ -114,12 +107,12 @@ class UpdateTaskRequest extends FormRequest
      * @param \Illuminate\Contracts\Validation\Validator $validator
      * @throws \Illuminate\Http\Exceptions\HttpResponseException
      */
-    protected function failedValidation(Validator $validator)
+    protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(response()->json([
-            'status'  => 'error',
+            'status' => 'error',
             'message' => 'Validation failed.',
-            'errors'  => $validator->errors(),
+            'errors' => $validator->errors(),
         ], 422));
     }
 }
