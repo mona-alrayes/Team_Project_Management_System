@@ -136,49 +136,4 @@ class Task extends Model
         return $query->orderBy('due_date', $sortOrder);
     }
 
-    /**
-     * Get the oldest task by creation date.
-     *
-     * This scope retrieves the first task ordered by the `created_at` column
-     * in ascending order, along with its related `user` and `project`.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \App\Models\Task|null
-     */
-    public function scopeOldestTask($query)
-    {
-        return $query->with(['user', 'project'])->orderBy('updated_at', 'asc')->first();
-    }
-
-    /**
-     * Get the newest task by creation date.
-     *
-     * This scope retrieves the first task ordered by the `created_at` column
-     * in descending order, along with its related `user` and `project`.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \App\Models\Task|null
-     */
-    public function scopeNewestTask($query)
-    {
-        return $query->with(['user', 'project'])->orderBy('updated_at', 'desc')->first();
-    }
-
-    // Scope to filter tasks by status
-   public function scopeTasksByStatus($query, $status)
-   {
-       return $query->where('status', $status);
-   }
-
-   // Scope to filter tasks by priority
-   public function scopeTasksByPriority($query, $priority)
-   {
-       return $query->where('priority', $priority);
-   }
-
-   public function scopeHighPriorityWithTitle($query, $title)
-    {
-        return $query->where('priority', 'high')
-                     ->where('title', 'LIKE', '%' . $title . '%');
-    }
 }
