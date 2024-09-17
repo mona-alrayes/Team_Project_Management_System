@@ -76,9 +76,9 @@ class TaskController extends Controller
      * @param string $id The ID of the task to retrieve.
      * @return \Illuminate\Http\JsonResponse JSON response containing the task data.
      */
-    public function show(string $id )
+    public function show(string $id)
     {
-        $fetchedData = $this->TaskService->showTask($id );
+        $fetchedData = $this->TaskService->showTask($id);
 
         return response()->json([
             'status' => 'success',
@@ -116,7 +116,6 @@ class TaskController extends Controller
      */
     public function updateByAssignedUser(UpdateStatusRequest $request, string $id)
     {
-        #TODO check the updatestatusRequest 
         $task = $this->TaskService->updateStatus($request->validated(), $id);
 
         return response()->json([
@@ -142,14 +141,20 @@ class TaskController extends Controller
         ], 200); // OK
     }
 
+    /**
+     * Restore deleted the specified task from storage.
+     *
+     * @param string $id The ID of the deleted task .
+     * @return \Illuminate\Http\JsonResponse JSON response containing a success message.
+     */
     public function restoreTask($id): \Illuminate\Http\JsonResponse
     {
-        $message= $this->TaskService->restoreTask($id);
+        $message = $this->TaskService->restoreTask($id);
         return response()->json([
             'status' => $message['status'],
             'message' => $message['message'],
             'task' => new TaskResource($message['task']),
         ], 200); // OK
-       
+
     }
 }
