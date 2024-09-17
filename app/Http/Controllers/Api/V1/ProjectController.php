@@ -26,9 +26,9 @@ class ProjectController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $projects = $this->ProjectService->getAllProjects($request);
+        $projects = $this->ProjectService->getAllProjects();
 
         return response()->json([
             'status' => 'success',
@@ -71,14 +71,18 @@ class ProjectController extends Controller
         ], 200); // OK
     }
 
-    public function showMyProjectTasks (Request $request)
+    public function getMyProjectTasks (Request $request)
     {
         $project = $this->ProjectService->MyProjectTasks($request);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Project with tasks retrieved successfully',
-            'project' => $project,
+            'project' => [
+                'Tasks'=>$project['tasks'],
+                'Oldest Task' => $project['oldestTask'],
+                'Newest Task' => $project['newestTask'],
+            ],
         ], 200); // OK
     }
 

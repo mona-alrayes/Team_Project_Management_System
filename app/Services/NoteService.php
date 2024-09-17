@@ -31,7 +31,6 @@ class NoteService
     {
         try {
 
-
             $notes = Note::with(['task' , 'user'])
                 ->paginate(5);
 

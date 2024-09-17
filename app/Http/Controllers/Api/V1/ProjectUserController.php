@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class ProjectUserController extends Controller
 {
     // Add a user to a project
-    public function store(Request $request, $projectId)
+    public function addUserToProject(Request $request, $projectId)
     {
         #TODO: separate the code into request validation and service 
         $validated = $request->validate([
@@ -38,7 +38,7 @@ class ProjectUserController extends Controller
     }
 
     // Remove a user from a project
-    public function destroy($projectId, $userId)
+    public function removeUserFromProject($projectId, $userId)
     {
         $project = Project::findOrFail($projectId);
         $project->users()->detach($userId);
@@ -50,7 +50,7 @@ class ProjectUserController extends Controller
     }
 
     // Update a user's role or contribution hours in a project
-    public function update(Request $request, $projectId, $userId)
+    public function updateUserInProject(Request $request, $projectId, $userId)
     {
         $validated = $request->validate([
             'role' => 'nullable|string|in:manager,developer,tester',
@@ -66,7 +66,7 @@ class ProjectUserController extends Controller
     }
 
     // Show users in a project
-    public function index($projectId)
+    public function showUsersInProject($projectId)
     {
         $project = Project::findOrFail($projectId);
         $users = $project->users()->get();
