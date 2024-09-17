@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+
 class UpdateNoteRequest extends FormRequest
 {
     /**
@@ -14,24 +15,24 @@ class UpdateNoteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-          // Get the task and the associated project
-          $task = Task::find($this->input('task_id'));
+        // Get the task and the associated project
+        $task = Task::find($this->input('task_id'));
 
-          if (!$task) {
-              return false; // If the task doesn't exist, deny the request
-          }
-  
-          // Get the user's role in the project through the pivot table
-          $userProjectRole = $task->project->users()
-              ->where('user_id', Auth::id())
-              ->first()
-              ->pivot->role ?? null;
-  
-          // Only allow users with the role 'tester' to store notes
-          return $userProjectRole === 'tester';
+        if (!$task) {
+            return false; // If the task doesn't exist, deny the request
+        }
+
+        // Get the user's role in the project through the pivot table
+        $userProjectRole = $task->project->users()
+            ->where('user_id', Auth::id())
+            ->first()
+            ->pivot->role ?? null;
+
+        // Only allow users with the role 'tester' to update notes
+        return $userProjectRole === 'tester';
     }
 
-  /**
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -44,6 +45,7 @@ class UpdateNoteRequest extends FormRequest
             'user_id' => ['nullable', 'integer', 'exists:users,id'],
         ];
     }
+
     /**
      * Get the custom error messages for the validator.
      *
@@ -54,7 +56,8 @@ class UpdateNoteRequest extends FormRequest
         return [
             'string' => 'حقل :attribute يجب أن يكون نصًا وليس أي نوع آخر',
             'integer' => 'حقل :attribute يحب ان يكون رقما',
-            'exists' => 'القيمة المحددة في حقل :attribute غير موجودة'
+            'exists' => 'القيمة المحددة في حقل :attribute غير موجودة',
+            'max' => 'حقل :attribute يجب ألا يتجاوز :max حرفًا',
         ];
     }
 
@@ -72,15 +75,17 @@ class UpdateNoteRequest extends FormRequest
         ];
     }
 
-    
+    /**
+     * Prepare the data for validation.
+     */
     protected function prepareForValidation()
     {
-        $task = Task::where('id', $this->input('task_id'))->first();
+        $task = Task::find($this->input('task_id'));
 
         $this->merge([
-            'note' => ucwords(strtolower($this->input('note'))),
-            'user_id' => Auth::user() ,
-            'task_id' => $task->id,
+            'note' => $this->input('note') ? ucwords(strtolower($this->input('note'))) : null,
+            'user_id' => Auth::id(),
+            'task_id' => $task ? $task->id : $this->input('task_id'),
         ]);
     }
 
@@ -93,9 +98,9 @@ class UpdateNoteRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'status'  => 'خطأ',
+            'status' => 'خطأ',
             'message' => 'فشلت عملية التحقق من صحة البيانات.',
-            'errors'  => $validator->errors(),
+            'errors' => $validator->errors(),
         ], 422));
     }
 }
