@@ -18,7 +18,7 @@ class TaskSeeder extends Seeder
             'description' => 'info about task1',
             'status' => 'pending',
             'priority' => 'high',
-            'due_to' => '20-09-2024',
+            'due_date' => '20-09-2024',
             'assigned_to' => '2',  // mona
             'project_id' => '1',
         ]);
@@ -28,7 +28,7 @@ class TaskSeeder extends Seeder
             'description' => 'info about task2',
             'status' => 'pending',
             'priority' => 'medium',
-            'due_to' => '22-09-2024',
+            'due_date' => '22-09-2024',
             'assigned_to' => '3',  // hani
             'project_id' => '1',
         ]);
@@ -38,7 +38,7 @@ class TaskSeeder extends Seeder
             'description' => 'info about task3',
             'status' => 'pending',
             'priority' => 'low',
-            'due_to' => '25-09-2024',
+            'due_date' => '25-09-2024',
             'assigned_to' => '4',  // ayham
             'project_id' => '2',
         ]);
@@ -48,7 +48,7 @@ class TaskSeeder extends Seeder
             'description' => 'info about task4',
             'status' => 'pending',
             'priority' => 'high',
-            'due_to' => '20-09-2024',
+            'due_date' => '20-09-2024',
             'assigned_to' => '5',  // somar
             'project_id' => '2',
         ]);
@@ -58,7 +58,7 @@ class TaskSeeder extends Seeder
             'description' => 'info about task5',
             'status' => 'pending',
             'priority' => 'medium',
-            'due_to' => '22-09-2024',
+            'due_date' => '22-09-2024',
             'assigned_to' => '6',  // yosef
             'project_id' => '3',
         ]);
@@ -68,7 +68,7 @@ class TaskSeeder extends Seeder
             'description' => 'info about task6',
             'status' => 'pending',
             'priority' => 'low',
-            'due_to' => '25-09-2024',
+            'due_date' => '25-09-2024',
             'assigned_to' => '2',  // mona
             'project_id' => '3',
         ]);

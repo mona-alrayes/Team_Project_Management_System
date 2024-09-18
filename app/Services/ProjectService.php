@@ -116,15 +116,12 @@ class ProjectService
             $tasksQuery = $user->tasksThroughProjects();
 
             $tasksQuery = $tasksQuery
-                // Use scope to filter tasks by status if provided
                 ->when($request->has('status'), function ($query) use ($request) {
                     return Project::whereRelation('tasks', 'status', $request->input('status'));
                 })
-                // Use scope to filter tasks by priority if provided
                 ->when($request->has('priority'), function ($query) use ($request) {
                     return Project::whereRelation('tasks', 'priority', $request->input('priority'));
                 })
-                // Filter tasks by high priority and title input condition if provided
                 ->when($request->has('title'), function ($query) use ($request) {
                     return $query->highPriorityWithTitle($request->input('title'));
                 })->get()->toArray();
